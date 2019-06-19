@@ -10,10 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_06_19_033631) do
+ActiveRecord::Schema.define(version: 2019_06_19_041302) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "amenities", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "announcements", force: :cascade do |t|
     t.datetime "published_at"
@@ -39,6 +45,48 @@ ActiveRecord::Schema.define(version: 2019_06_19_033631) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
+  create_table "friendly_id_slugs", force: :cascade do |t|
+    t.string "slug", null: false
+    t.integer "sluggable_id", null: false
+    t.string "sluggable_type", limit: 50
+    t.string "scope"
+    t.datetime "created_at"
+    t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
+    t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
+    t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+  end
+
+  create_table "listing_categories", force: :cascade do |t|
+    t.bigint "listing_id"
+    t.bigint "property_kind_id"
+    t.index ["listing_id"], name: "index_listing_categories_on_listing_id"
+    t.index ["property_kind_id"], name: "index_listing_categories_on_property_kind_id"
+  end
+
+  create_table "listings", force: :cascade do |t|
+    t.integer "beds"
+    t.integer "baths"
+    t.string "title"
+    t.boolean "plus"
+    t.integer "star_rating"
+    t.integer "price"
+    t.string "rental_period"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "location_id"
+    t.text "image_url"
+    t.index ["location_id"], name: "index_listings_on_location_id"
+  end
+
+  create_table "locations", force: :cascade do |t|
+    t.string "name"
+    t.string "lat"
+    t.string "lng"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "description"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.bigint "recipient_id"
     t.bigint "actor_id"
@@ -46,6 +94,21 @@ ActiveRecord::Schema.define(version: 2019_06_19_033631) do
     t.string "action"
     t.bigint "notifiable_id"
     t.string "notifiable_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "property_amenities", force: :cascade do |t|
+    t.bigint "listing_id"
+    t.bigint "amenities_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["amenities_id"], name: "index_property_amenities_on_amenities_id"
+    t.index ["listing_id"], name: "index_property_amenities_on_listing_id"
+  end
+
+  create_table "property_kinds", force: :cascade do |t|
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -66,4 +129,9 @@ ActiveRecord::Schema.define(version: 2019_06_19_033631) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "listing_categories", "listings"
+  add_foreign_key "listing_categories", "property_kinds"
+  add_foreign_key "listings", "locations"
+  add_foreign_key "property_amenities", "amenities", column: "amenities_id"
+  add_foreign_key "property_amenities", "listings"
 end

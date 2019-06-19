@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :locations
+  resources :listings
   namespace :admin do
       resources :users
       resources :announcements
